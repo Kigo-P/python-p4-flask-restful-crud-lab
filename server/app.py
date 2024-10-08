@@ -46,6 +46,45 @@ class PlantByID(Resource):
     def get(self, id):
         plant = Plant.query.filter_by(id=id).first().to_dict()
         return make_response(jsonify(plant), 200)
+    
+    #  creating a patch method
+    def patch(self, id):
+        # querying ad filtering the plants table by the id
+        plant = Plant.query.filter_by(id = id).first()
+
+        data = request.get_json()
+        #  setting attribute using a for loop and data
+        for attr in data:
+            setattr(plant, attr, data[attr])
+
+        #  adding and commiting the updated record to the db
+        db.session.add(plant)
+        db.session.commit()
+
+        # using to_dict() to convert the updated plant to a dictionary
+        plant_dict = plant.to_dict()
+
+        # creating and returning a response
+        response = make_response(plant_dict, 200, {"Content-Type": "application/json"})
+        return response
+    
+    # creating a delete method
+    def delete(self, id):
+        # querying ad filtering the plants table by the id
+        plant = Plant.query.filter_by(id = id).first()
+
+        #  deleting and commiting the plant changes to the db
+        db.session.delete(plant)
+        db.session.commit()
+
+        #  creating a message to show that deleion was successful 
+        delete_message = {
+            "message" : "Internal Server Error"
+        }
+        # creating and returning a response
+        response = make_response(delete_message, 204)
+        return response
+    
 
 
 api.add_resource(PlantByID, '/plants/<int:id>')
